@@ -3,7 +3,6 @@ import { useSpotifyService } from '../services/SpotifyService';
 import { useAuthContext } from '../contexts/AuthContext';
 import { Virtuoso } from 'react-virtuoso';
 
-
 export const Search: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [savedContent, setSavedContent] = useState<any[]>([]);
@@ -48,7 +47,6 @@ export const Search: React.FC = () => {
       try {
         if (isAuthenticated) {
           const allContent = await getSavedContent();
-
           setSavedContent(allContent);
         }
       } catch (error) {
@@ -58,8 +56,10 @@ export const Search: React.FC = () => {
 
     if (!didFetch.current) {
       fetchSavedContent();
+    } else {
+      performSearch(); // Call performSearch when savedContent changes
     }
-  }, [getSavedContent, isAuthenticated]);
+  }, [getSavedContent, isAuthenticated, savedContent]);
 
   return (
     <div>
@@ -87,7 +87,6 @@ export const Search: React.FC = () => {
           );
         }}
       />
-
     </div>
   );
 };
