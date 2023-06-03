@@ -49,7 +49,7 @@ export const Search: React.FC = () => {
   }, 500);
 
   const didFetch = useRef(false);
-
+// Ways to expand, also introduce searching catalogs in general for music recommendations and not just saved audio tracks
   useEffect(() => {
     const fetchSavedContent = async () => {
       setIsLoading(true);
@@ -82,7 +82,7 @@ export const Search: React.FC = () => {
         sx={{ borderRadius: "30px", flex: 1, maxHeight: "60px", mb: 2 }}
         value={searchTerm}
         onChange={handleSearchChange}
-        placeholder="Search..."
+        placeholder="Search your songs"
       />
       <Stack
         flexDirection="row"

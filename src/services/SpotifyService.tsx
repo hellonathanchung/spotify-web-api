@@ -86,6 +86,7 @@ export function useSpotifyService() {
       episodesResponse.json(),
     ]);
 
+    // type reference https://github.com/adamgrieger/spotify-web-api-ts/blob/master/src/types/SpotifyObjects.ts
     const albums: ContentItem<"Album">[] = albumsData.items.map(
       (item: any) => ({
         id: item.album.id,

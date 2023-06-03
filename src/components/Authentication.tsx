@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "../contexts/AuthContext";
+import { Stack } from "@mui/material";
 
 export const Authentication: React.FC = () => {
   const { isAuthenticated, requestAccessToken } = useAuthContext();
@@ -28,9 +29,9 @@ export const Authentication: React.FC = () => {
   }, [isAuthenticated, navigate, requestAccessToken]);
 
   return (
-    <div>
+    <Stack>
       <h1>Authentication</h1>
       <p>Processing authentication...</p>
-    </div>
+    </Stack>
   );
 };

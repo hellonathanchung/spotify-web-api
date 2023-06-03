@@ -1,4 +1,5 @@
 export * from './Authentication'
+export * from './RequireAuth'
 export * from './Search'
 export * from './Profile'
 export * from './Header'
