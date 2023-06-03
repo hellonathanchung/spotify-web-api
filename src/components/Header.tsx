@@ -1,17 +1,36 @@
-import React from 'react';
-import { useAuthContext } from '../contexts/AuthContext';
+import React from "react";
+import { useAuthContext } from "../contexts/AuthContext";
+import Button from "@mui/material/Button";
+
+import { useNavigate } from "react-router-dom";
+import { Stack } from "@mui/material";
 
 export const Header: React.FC = React.memo(() => {
-  const { isAuthenticated, logout, login,refreshToken } = useAuthContext();
+  const { isAuthenticated, logout, login } = useAuthContext();
+
+  const navigate = useNavigate();
 
   return (
     <header>
-      <h1>My App</h1>
-      {isAuthenticated ? (
-        <><button onClick={logout}>Logout</button><button onClick={refreshToken}> Refresh</button></>
-      ) : (
-        <button onClick={login}>Login</button>
-      )}
+      <Stack
+        sx={{ padding: "10px 50px" }}
+        flexDirection="row"
+        justifyContent="space-between"
+      >
+        <Stack flexDirection={"row"}>
+          <Button onClick={() => navigate("profile")}>Profile</Button>
+          <Button onClick={() => navigate("search")}>Search</Button>
+        </Stack>
+        {isAuthenticated ? (
+          <Button variant="contained" onClick={logout}>
+            Logout
+          </Button>
+        ) : (
+          <Button variant="contained" onClick={login}>
+            Login
+          </Button>
+        )}
+      </Stack>
     </header>
   );
 });

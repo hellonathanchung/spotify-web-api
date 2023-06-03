@@ -1,30 +1,31 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useSpotifyService } from '../services/SpotifyService';
-import { useAuthContext } from '../contexts/AuthContext';
-import { Virtuoso } from 'react-virtuoso';
+import React, { useState, useEffect, useRef } from "react";
+import { ContentItem, useSpotifyService } from "../services/SpotifyService";
+import { useAuthContext } from "../contexts/AuthContext";
+import {  Virtuoso } from "react-virtuoso";
+import {
+  Container,
+  Stack,
+  TextField,
+  Typography,
+  debounce,
+} from "@mui/material";
 
 export const Search: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [savedContent, setSavedContent] = useState<any[]>([]);
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [savedContent, setSavedContent] = useState<ContentItem<"Album"|"Track"|"Episode">[]>([]);
+  const [searchResults, setSearchResults] = useState<ContentItem<"Album"|"Track"|"Episode">[]>([]);
 
   const { isAuthenticated } = useAuthContext();
-
   const { getSavedContent } = useSpotifyService();
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
 
-  const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    performSearch();
-  };
-
-  const performSearch = () => {
+  const performSearch = debounce(() => {
     const searchTermLower = searchTerm.toLowerCase();
 
-    if (searchTermLower === '') {
+    if (searchTermLower === "") {
       setSearchResults(savedContent);
     } else {
       const filteredResults = savedContent.filter((item) => {
@@ -37,7 +38,7 @@ export const Search: React.FC = () => {
       });
       setSearchResults(filteredResults);
     }
-  };
+  }, 500);
 
   const didFetch = useRef(false);
 
@@ -50,43 +51,79 @@ export const Search: React.FC = () => {
           setSavedContent(allContent);
         }
       } catch (error) {
-        console.error('Error fetching saved content:', error);
+        console.error("Error fetching saved content:", error);
       }
     };
 
     if (!didFetch.current) {
       fetchSavedContent();
     } else {
-      performSearch(); // Call performSearch when savedContent changes
+      performSearch();
     }
-  }, [getSavedContent, isAuthenticated, savedContent]);
+  }, [getSavedContent, isAuthenticated, savedContent, performSearch]);
 
   return (
-    <div>
-      <h1>Search</h1>
-      <form onSubmit={handleSearchSubmit}>
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={handleSearchChange}
-          placeholder="Search..."
-        />
-        <button type="submit">Search</button>
-      </form>
-
+    <Container>
+      <TextField
+        type="text"
+        fullWidth
+        sx={{ borderRadius: "30px", flex: 1, maxHeight: "60px",  mb: 2      }}
+        value={searchTerm}
+        onChange={handleSearchChange}
+        placeholder="Search..."
+      />
+        <Stack
+          flexDirection="row"
+          sx={{
+            fontWeight: 'bold',
+            borderRadius: '12px',
+            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+            py: 1,
+            px: 2,
+          }}
+        >
+          <Typography variant="subtitle1" sx={{ flex: 1 }}>
+          </Typography>
+          <Typography variant="subtitle1" sx={{ flex: 2 }}>
+            Title
+          </Typography>
+          <Typography variant="subtitle1" sx={{ flex: 1 }}>
+            Genre
+          </Typography>
+          <Typography variant="subtitle1" sx={{ flex: 1 }}>
+            Type
+          </Typography>
+        </Stack>
       <Virtuoso
-        style={{ width: '100%', height: '500px' }} // Adjust the width and height as per your requirement
+        style={{ display: "flex", flex: 1, height: "700px", backgroundColor: "rgba(255,255,255,0.01)", borderRadius:'20px'}}
         totalCount={searchResults.length}
         itemContent={(index: number) => {
           const item = searchResults[index];
           return (
-            <div>
-              <img src={item.artwork} alt={item.name} style={{ maxHeight: '150px' }} />
-              {item.name} - {item.type}
-            </div>
+            <Stack
+              flexDirection={"row"}
+              sx={{
+                padding: '15px 15px',
+                "&:hover": {
+                  backgroundColor: "rgba(255,255,255,0.10)",
+                  cursor: "pointer",
+                },
+              }}
+            >
+              <img
+                src={item.artwork}
+                alt={item.name}
+                style={{ maxHeight: "150px", maxWidth: "150px",  flex: 1, borderRadius: '8px'}}
+              />
+              <Stack flexDirection="row" ml={2} flex={1}>
+                <Typography sx={{flex: 2}}> {item.name}</Typography>
+                <Typography sx={{flex: 1}}> {item.genre}</Typography>
+                <Typography sx={{flex:1}}>{item.type}</Typography>
+              </Stack>
+            </Stack>
           );
         }}
       />
-    </div>
+    </Container>
   );
 };
