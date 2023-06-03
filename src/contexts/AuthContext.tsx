@@ -41,7 +41,7 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
       setIsLoading(true)
       const codeVerifier = generateRandomString(64);
       const codeChallenge = await generateCodeChallenge(codeVerifier);
-      const scope = 'user-read-private user-read-email';
+      const scope = 'user-read-private user-read-email playlist-modify-private user-library-read';
 
       localStorage.setItem('code_verifier', codeVerifier);
 
