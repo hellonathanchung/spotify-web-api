@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ContentItem, useSpotifyService } from "../services/SpotifyService";
 import { useAuthContext } from "../contexts/AuthContext";
-import {  Virtuoso } from "react-virtuoso";
+import { Virtuoso } from "react-virtuoso";
 import {
+  CircularProgress,
   Container,
   Stack,
   TextField,
@@ -12,8 +13,13 @@ import {
 
 export const Search: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [savedContent, setSavedContent] = useState<ContentItem<"Album"|"Track"|"Episode">[]>([]);
-  const [searchResults, setSearchResults] = useState<ContentItem<"Album"|"Track"|"Episode">[]>([]);
+  const [savedContent, setSavedContent] = useState<
+    ContentItem<"Album" | "Track" | "Episode">[]
+  >([]);
+  const [searchResults, setSearchResults] = useState<
+    ContentItem<"Album" | "Track" | "Episode">[]
+  >([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { isAuthenticated } = useAuthContext();
   const { getSavedContent } = useSpotifyService();
@@ -38,12 +44,16 @@ export const Search: React.FC = () => {
       });
       setSearchResults(filteredResults);
     }
+
+    setIsLoading(false);
   }, 500);
 
   const didFetch = useRef(false);
 
   useEffect(() => {
     const fetchSavedContent = async () => {
+      setIsLoading(true);
+
       didFetch.current = true;
       try {
         if (isAuthenticated) {
@@ -52,6 +62,8 @@ export const Search: React.FC = () => {
         }
       } catch (error) {
         console.error("Error fetching saved content:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -67,63 +79,92 @@ export const Search: React.FC = () => {
       <TextField
         type="text"
         fullWidth
-        sx={{ borderRadius: "30px", flex: 1, maxHeight: "60px",  mb: 2      }}
+        sx={{ borderRadius: "30px", flex: 1, maxHeight: "60px", mb: 2 }}
         value={searchTerm}
         onChange={handleSearchChange}
         placeholder="Search..."
       />
-        <Stack
-          flexDirection="row"
-          sx={{
-            fontWeight: 'bold',
-            borderRadius: '12px',
-            backgroundColor: 'rgba(255, 255, 255, 0.2)',
-            py: 1,
-            px: 2,
-          }}
-        >
-          <Typography variant="subtitle1" sx={{ flex: 1 }}>
-          </Typography>
-          <Typography variant="subtitle1" sx={{ flex: 2 }}>
-            Title
-          </Typography>
-          <Typography variant="subtitle1" sx={{ flex: 1 }}>
-            Genre
-          </Typography>
-          <Typography variant="subtitle1" sx={{ flex: 1 }}>
-            Type
-          </Typography>
-        </Stack>
-      <Virtuoso
-        style={{ display: "flex", flex: 1, height: "700px", backgroundColor: "rgba(255,255,255,0.01)", borderRadius:'20px'}}
-        totalCount={searchResults.length}
-        itemContent={(index: number) => {
-          const item = searchResults[index];
-          return (
-            <Stack
-              flexDirection={"row"}
-              sx={{
-                padding: '15px 15px',
-                "&:hover": {
-                  backgroundColor: "rgba(255,255,255,0.10)",
-                  cursor: "pointer",
-                },
-              }}
-            >
-              <img
-                src={item.artwork}
-                alt={item.name}
-                style={{ maxHeight: "150px", maxWidth: "150px",  flex: 1, borderRadius: '8px'}}
-              />
-              <Stack flexDirection="row" ml={2} flex={1}>
-                <Typography sx={{flex: 2}}> {item.name}</Typography>
-                <Typography sx={{flex: 1}}> {item.genre}</Typography>
-                <Typography sx={{flex:1}}>{item.type}</Typography>
-              </Stack>
-            </Stack>
-          );
+      <Stack
+        flexDirection="row"
+        sx={{
+          fontWeight: "bold",
+          borderRadius: "12px",
+          backgroundColor: "rgba(255, 255, 255, 0.2)",
+          py: 1,
+          px: 2,
         }}
-      />
+      >
+        <Typography variant="subtitle1" sx={{ flex: 1 }}></Typography>
+        <Typography variant="subtitle1" sx={{ flex: 2 }}>
+          Title
+        </Typography>
+        <Typography variant="subtitle1" sx={{ flex: 1 }}>
+          Genre
+        </Typography>
+        <Typography variant="subtitle1" sx={{ flex: 1 }}>
+          Type
+        </Typography>
+      </Stack>
+      {isLoading ? (
+          <Stack
+            sx={{
+              display: "flex",
+              flex: 1,
+              height: "700px",
+              backgroundColor: "rgba(255,255,255,0.01)",
+              borderRadius: "20px",
+            }}
+          >
+        <Stack justifyContent={'center'} alignItems={'center'} flex={1}>
+            <Typography sx={{fontSize: '18px', fontWeight: 600}}>
+              Loading
+              </Typography>
+            <CircularProgress />
+          </Stack>
+        </Stack>
+      ) : (
+        <Virtuoso
+          style={{
+            display: "flex",
+            flex: 1,
+            height: "700px",
+            backgroundColor: "rgba(255,255,255,0.01)",
+            borderRadius: "20px",
+          }}
+          totalCount={searchResults.length}
+          itemContent={(index: number) => {
+            const item = searchResults[index];
+            return (
+              <Stack
+                flexDirection={"row"}
+                sx={{
+                  padding: "15px 15px",
+                  "&:hover": {
+                    backgroundColor: "rgba(255,255,255,0.10)",
+                    cursor: "pointer",
+                  },
+                }}
+              >
+                <img
+                  src={item.artwork}
+                  alt={item.name}
+                  style={{
+                    maxHeight: "150px",
+                    maxWidth: "150px",
+                    flex: 1,
+                    borderRadius: "8px",
+                  }}
+                />
+                <Stack flexDirection="row" ml={2} flex={1}>
+                  <Typography sx={{ flex: 2 }}> {item.name}</Typography>
+                  <Typography sx={{ flex: 1 }}> {item.genre}</Typography>
+                  <Typography sx={{ flex: 1 }}>{item.type}</Typography>
+                </Stack>
+              </Stack>
+            );
+          }}
+        />
+      )}
     </Container>
   );
 };
